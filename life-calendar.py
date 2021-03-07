@@ -30,7 +30,7 @@ def line_header (dwg, x, y, text):
     dwg.add(dwg.text(text, insert=(x, y), fill='black', text_anchor='end'))
 
 def setup_canvas (filename, width, height):
-    dwg = svgwrite.Drawing('test.svg', profile='tiny', size=(width,height))
+    dwg = svgwrite.Drawing(svg_name, profile='tiny', size=(width,height))
     dwg.add(dwg.rect((0,0), (width, height),fill='white'))
 
     return dwg
@@ -38,8 +38,8 @@ def setup_canvas (filename, width, height):
 def export (dwg, svg_name, pdf_name):
     dwg.save()
 
-    drawing = svg2rlg("test.svg")
-    renderPDF.drawToFile(drawing, "test.pdf")
+    drawing = svg2rlg(svg_name)
+    renderPDF.drawToFile(drawing, pdf_name)
 
 ##########################################
 # Parameters
@@ -49,8 +49,8 @@ today = datetime.date.today()
 birthday = datetime.date(1994, 8, 13)
 #birthday = datetime.date(2000, 1, 1)
 
-svg_name = 'test.svg'
-out_name = 'text.pdf'
+svg_name = 'output/out.svg'
+out_name = 'output/out.pdf'
 canvasx = 2100
 canvasy = 2970
 size = 10
