@@ -8,9 +8,12 @@ from reportlab.graphics import renderPDF
 # Helpers
 ##########################################
 
-def cell(dwg, x, y, size, is_gone, is_birthday):
+def cell(dwg, x, y, size, is_gone, is_birthday, is_new_year):
+    # choose style
     fill = 'black' if is_gone else 'white'
+    if is_new_year: fill = 'grey'
     if is_birthday: fill = 'red'
+
     dwg.add(dwg.circle(center=(x,y),
         r=size, 
         stroke=svgwrite.rgb(15, 15, 15, '%'),
@@ -44,6 +47,7 @@ def export (dwg, svg_name, pdf_name):
 
 today = datetime.date.today()
 birthday = datetime.date(1994, 8, 13)
+#birthday = datetime.date(2000, 1, 1)
 
 svg_name = 'test.svg'
 out_name = 'text.pdf'
@@ -69,17 +73,34 @@ dwg = setup_canvas(svg_name, canvasx, canvasy)
 startx = marginleft + size/2
 starty = marginup + size/2
 date = birthday
+next_birthday = birthday
 week = datetime.timedelta(days=7)
 for y in range(ny):
     y = starty + y * distancey
-    line_header(dwg, startx - line_header_distance, y+ size/2, str(date.year))
+    
+    # Drawing year to the left of each row
+    # Check if this row will contain one or two years, set variable accordingly
+    this_year = date.year
+    last_cell_year = (date + (nx-1) * week).year
+    if this_year == last_cell_year:
+        year_header = str(this_year)
+    else:
+        year_header = f"{this_year}-{last_cell_year}"
+    line_header(dwg, startx - line_header_distance, y+ size/2, year_header)
+
     for x in range(nx):
         is_gone = date + week < today
 
-        this_year_birthday = datetime.date(date.year, birthday.month, birthday.day)
-        is_birthday = date <= this_year_birthday and this_year_birthday <= date + week
+        # Birthday management
+        is_birthday = date <= next_birthday and next_birthday <= date + week
 
-        cell (dwg, startx + x * distancex, y, size,is_gone, is_birthday)
+        if is_birthday:
+            next_birthday = datetime.date(next_birthday.year+1, next_birthday.month, next_birthday.day)
+
+        # New year's eve management
+        is_new_year = date.year < (date+week).year
+
+        cell (dwg, startx + x * distancex, y, size,is_gone, is_birthday, is_new_year)
 
         date += week
 
