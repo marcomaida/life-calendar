@@ -1,5 +1,4 @@
-import svgwrite
-import datetime
+import svgwrite, datetime, math
 from datetime import date
 from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPDF
@@ -63,11 +62,11 @@ margin_top = 250
 margin_bottom = 100
 
 # Cells are grouped horizontally and vertically
-group_cell_size_x = 4
-group_cell_size_y = 10
+group_size_x = 4
+group_size_y = 10
 
 # How close are cells of the same group
-group_density_x = .6 
+group_density_x = .2
 group_density_y = .6 
 
 assert 0 <= group_density_x and group_density_x <= 1, "Group density should be in the range [0,1]"
@@ -76,11 +75,16 @@ assert 0 <= group_density_y and group_density_y <= 1, "Group density should be i
 # Calculating distance of the dots 
 total_space_x = canvas_x - margin_left - margin_right
 total_space_y = canvas_y - margin_top - margin_bottom
-distance_x = total_space_x / n_x
-distance_y = total_space_y / n_y
 
-# Distance between groups
-distance_group = 0
+n_spaces_x = n_x - 1
+n_group_spaces_x = math.ceil(n_x / group_size_x) - 1
+n_cell_spaces_x = n_spaces_x - n_group_spaces_x
+assert n_group_spaces_x + n_cell_spaces_x == n_spaces_x
+
+distance_cells_x = total_space_x / n_spaces_x * (1-group_density_x)
+distance_groups_x = (total_space_x - (distance_cells_x * n_cell_spaces_x)) / n_group_spaces_x
+
+distance_y = total_space_y / n_y
 
 ##########################################
 # Drawing
@@ -106,6 +110,8 @@ for y in range(n_y):
         year_header = f"{this_year}-{last_cell_year}"
     line_header(dwg, startx - line_header_distance, y+ cell_size/2, year_header)
 
+    x_pos = startx
+
     for x in range(n_x):
         is_gone = date + week < today
 
@@ -118,7 +124,12 @@ for y in range(n_y):
         # New year's eve management
         is_new_year = date.year < (date+week).year
 
-        cell (dwg, startx + x * distance_x, y, cell_size,is_gone, is_birthday, is_new_year)
+        cell (dwg, x_pos, y, cell_size,is_gone, is_birthday, is_new_year)
+
+        if (x+1) % group_size_x == 0:
+            x_pos += distance_groups_x
+        else:
+            x_pos += distance_cells_x
 
         date += week
 
