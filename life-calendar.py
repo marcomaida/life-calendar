@@ -8,14 +8,14 @@ from reportlab.graphics import renderPDF
 # Helpers
 ##########################################
 
-def cell(dwg, x, y, size, is_gone, is_birthday, is_new_year):
+def cell(dwg, x, y, cell_size, is_gone, is_birthday, is_new_year):
     # choose style
     fill = 'black' if is_gone else 'white'
     if is_new_year: fill = 'grey'
     if is_birthday: fill = 'red'
 
     dwg.add(dwg.circle(center=(x,y),
-        r=size, 
+        r=cell_size, 
         stroke=svgwrite.rgb(15, 15, 15, '%'),
         fill=fill)
     )
@@ -51,44 +51,62 @@ birthday = datetime.date(1994, 8, 13)
 
 svg_name = 'output/out.svg'
 out_name = 'output/out.pdf'
-canvasx = 2100
-canvasy = 2970
-size = 10
-nx = 52
-ny = 90
+canvas_x = 2100
+canvas_y = 2970
+cell_size = 7
+n_x = 52
+n_y = 90
 line_header_distance = 30
-marginleft = 200
-marginright = 100
-marginup = 250
-marginbottom = 100
-distancex = (canvasx - marginleft - marginright) / nx
-distancey = (canvasy - marginup - marginbottom) / ny
+margin_left = 200
+margin_right = 100
+margin_top = 250
+margin_bottom = 100
+
+# Cells are grouped horizontally and vertically
+group_cell_size_x = 4
+group_cell_size_y = 10
+
+# How close are cells of the same group
+group_density_x = .6 
+group_density_y = .6 
+
+assert 0 <= group_density_x and group_density_x <= 1, "Group density should be in the range [0,1]"
+assert 0 <= group_density_y and group_density_y <= 1, "Group density should be in the range [0,1]"
+
+# Calculating distance of the dots 
+total_space_x = canvas_x - margin_left - margin_right
+total_space_y = canvas_y - margin_top - margin_bottom
+distance_x = total_space_x / n_x
+distance_y = total_space_y / n_y
+
+# Distance between groups
+distance_group = 0
 
 ##########################################
 # Drawing
 ##########################################
 
-dwg = setup_canvas(svg_name, canvasx, canvasy)
+dwg = setup_canvas(svg_name, canvas_x, canvas_y)
 
-startx = marginleft + size/2
-starty = marginup + size/2
+startx = margin_left + cell_size/2
+starty = margin_top + cell_size/2
 date = birthday
 next_birthday = birthday
 week = datetime.timedelta(days=7)
-for y in range(ny):
-    y = starty + y * distancey
+for y in range(n_y):
+    y = starty + y * distance_y
     
     # Drawing year to the left of each row
     # Check if this row will contain one or two years, set variable accordingly
     this_year = date.year
-    last_cell_year = (date + (nx-1) * week).year
+    last_cell_year = (date + (n_x-1) * week).year
     if this_year == last_cell_year:
         year_header = str(this_year)
     else:
         year_header = f"{this_year}-{last_cell_year}"
-    line_header(dwg, startx - line_header_distance, y+ size/2, year_header)
+    line_header(dwg, startx - line_header_distance, y+ cell_size/2, year_header)
 
-    for x in range(nx):
+    for x in range(n_x):
         is_gone = date + week < today
 
         # Birthday management
@@ -100,12 +118,12 @@ for y in range(ny):
         # New year's eve management
         is_new_year = date.year < (date+week).year
 
-        cell (dwg, startx + x * distancex, y, size,is_gone, is_birthday, is_new_year)
+        cell (dwg, startx + x * distance_x, y, cell_size,is_gone, is_birthday, is_new_year)
 
         date += week
 
 
-title (dwg, canvasx/2, 150, "MY LIFE IN WEEKS")
+title (dwg, canvas_x/2, 150, "MY LIFE IN WEEKS")
 export(dwg, svg_name, out_name)
 
 
