@@ -49,7 +49,7 @@ out_name = 'output/out.pdf'
 
 text_color = '#151515'
 week_color = '#151515'
-birthday_color = '#A10813'
+birthday_color = '#C12823'
 new_year_color = '#2E40A8'
 border_width = 1
 border_width_special_weeks = 2
@@ -57,9 +57,12 @@ canvas_x = 2100
 canvas_y = 2970
 
 final_year = 50
-title = f"MY LIFE, UNTIL I'M {final_year}"
+title = f"MY LIFE BEFORE {final_year}"
 title_size = 170
-title_offset = 100
+title_offset = 130
+subtitle = f"A dot for each week. Spend them wisely."
+subtitle_size = 40
+subtitle_offset = 80
 cell_size = 13
 last_cell_size = 25
 border_width_last_cell = 4
@@ -124,7 +127,7 @@ y_pos = start_y
 for y in range(n_y):
     # Drawing year to the left of each row
     # Check if this row will contain one or two years, set variable accordingly
-    assert age < final_year, "Trying to draw after the final year has been reached"
+    assert age < final_year, "Trying to draw after the final birthday"
 
     this_year = date.year
     last_cell_year = (date + (n_x-1) * one_week).year
@@ -178,6 +181,7 @@ for y in range(n_y):
 
 #Draw title 
 text(dwg, canvas_x/2, margin_top - title_offset, title, text_color, title_size)
+text(dwg, canvas_x/2, margin_top - subtitle_offset, subtitle, text_color, subtitle_size)
 
 export(dwg, svg_name, out_name)
 
