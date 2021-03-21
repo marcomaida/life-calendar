@@ -17,9 +17,9 @@ def circle(dwg, x, y, size, stroke_color, fill_color, border_width):
 
 def text (dwg, x, y, text, color, font_size, style='normal',text_anchor='middle'):
     text_style = f"""
-        font-family: helvetica;
-        font-style: {style};
-        """
+        font-family: helvetica; 
+        font-style: {style}; 
+        """ # Font style is not working in the PDF 
 
     text = dwg.text(text, 
     insert=(x, y), 
@@ -143,7 +143,7 @@ for y in range(n_y):
     if this_year == last_cell_year:
         year_header = str(this_year)
     else:
-        year_header = f"{this_year} ➤ {last_cell_year}"
+        year_header = f"{this_year} • {last_cell_year}"
     text(dwg, start_x - line_header_distance, y_pos + cell_size/2, year_header, line_header_color, line_header_size, 'normal','end')
 
     x_pos = start_x
