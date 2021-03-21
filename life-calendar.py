@@ -15,20 +15,23 @@ def circle(dwg, x, y, size, stroke_color, fill_color, border_width):
         stroke_width=border_width,
         fill=fill_color))
 
-def text (dwg, x, y, text, color, font_size, text_anchor='middle'):
-    text_style = "font-size:%ipx; font-family:%s" % (1000, "Courier New"),
+def text (dwg, x, y, text, color, font_size, style='normal',text_anchor='middle'):
+    text_style = f"""
+        font-family: helvetica;
+        font-style: {style};
+        """
+
     text = dwg.text(text, 
     insert=(x, y), 
-    fill=color, 
+    fill=color,
+    style=text_style,
     font_size=font_size,
     text_anchor=text_anchor)
-    
-    # TODO make TSPAN
-    #text.add(dwg.tspan('Word', font_size='1.5em', fill='red'))
+
     dwg.add(text)
 
 def setup_canvas (filename, width, height):
-    dwg = svgwrite.Drawing(svg_name, profile='tiny', size=(width,height))
+    dwg = svgwrite.Drawing(svg_name, size=(width,height))
     dwg.add(dwg.rect((0,0), (width, height),fill='white'))
 
     return dwg
@@ -66,7 +69,7 @@ final_year = 50
 title = f"MY LIFE BEFORE {final_year}"
 title_size = 170
 title_offset = 130
-subtitle = f"A dot for each week. Spend them wisely."
+subtitle = f"Each dot is a week. Spend them wisely."
 subtitle_size = 30
 subtitle_offset = 80
 cell_size = 13
@@ -141,7 +144,7 @@ for y in range(n_y):
         year_header = str(this_year)
     else:
         year_header = f"{this_year} ➤ {last_cell_year}"
-    text(dwg, start_x - line_header_distance, y_pos + cell_size/2, year_header, line_header_color, line_header_size, 'end')
+    text(dwg, start_x - line_header_distance, y_pos + cell_size/2, year_header, line_header_color, line_header_size, 'normal','end')
 
     x_pos = start_x
 
@@ -189,7 +192,7 @@ for y in range(n_y):
 
 #Draw title 
 text(dwg, canvas_x/2, margin_top - title_offset, title, title_color, title_size)
-text(dwg, canvas_x/2, margin_top - subtitle_offset, subtitle, subtitle_color, subtitle_size)
+text(dwg, canvas_x/2, margin_top - subtitle_offset, subtitle, subtitle_color, subtitle_size, 'italic')
 
 export(dwg, svg_name, out_name)
 
