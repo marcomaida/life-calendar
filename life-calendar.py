@@ -7,7 +7,6 @@ from reportlab.graphics import renderPDF
 # Helpers
 ##########################################
 
-
 def circle(dwg, x, y, size, stroke_color, fill_color, border_width):
     assert size > 0
     dwg.add(dwg.circle(center=(x,y),
@@ -17,11 +16,16 @@ def circle(dwg, x, y, size, stroke_color, fill_color, border_width):
         fill=fill_color))
 
 def text (dwg, x, y, text, color, font_size, text_anchor='middle'):
-    dwg.add(dwg.text(text, 
+    text_style = "font-size:%ipx; font-family:%s" % (1000, "Courier New"),
+    text = dwg.text(text, 
     insert=(x, y), 
-    fill=text_color, 
+    fill=color, 
     font_size=font_size,
-    text_anchor=text_anchor))
+    text_anchor=text_anchor)
+    
+    # TODO make TSPAN
+    #text.add(dwg.tspan('Word', font_size='1.5em', fill='red'))
+    dwg.add(text)
 
 def setup_canvas (filename, width, height):
     dwg = svgwrite.Drawing(svg_name, profile='tiny', size=(width,height))
@@ -47,10 +51,12 @@ birthday = datetime.date(1994, 8, 13) # MM
 svg_name = 'output/out.svg'
 out_name = 'output/out.pdf'
 
-text_color = '#151515'
-week_color = '#151515'
-birthday_color = '#C12823'
-new_year_color = '#2E40A8'
+title_color = '#151515'
+subtitle_color = '#909090'
+line_header_color = '#151515'
+week_color = '#4A4A4A'
+birthday_color = '#FF4A91'
+new_year_color = '#00D8BE'
 border_width = 1
 border_width_special_weeks = 2
 canvas_x = 2100
@@ -61,7 +67,7 @@ title = f"MY LIFE BEFORE {final_year}"
 title_size = 170
 title_offset = 130
 subtitle = f"A dot for each week. Spend them wisely."
-subtitle_size = 40
+subtitle_size = 30
 subtitle_offset = 80
 cell_size = 13
 last_cell_size = 25
@@ -134,8 +140,8 @@ for y in range(n_y):
     if this_year == last_cell_year:
         year_header = str(this_year)
     else:
-        year_header = f"{this_year}-{last_cell_year}"
-    text(dwg, start_x - line_header_distance, y_pos + cell_size/2, year_header, text_color, line_header_size, 'end')
+        year_header = f"{this_year} ➤ {last_cell_year}"
+    text(dwg, start_x - line_header_distance, y_pos + cell_size/2, year_header, line_header_color, line_header_size, 'end')
 
     x_pos = start_x
 
@@ -152,15 +158,17 @@ for y in range(n_y):
         # New year's eve management
         is_new_year = date.year < (date+one_week).year
 
-        fill = week_color if is_gone else 'white'
         if is_birthday: 
+            fill = birthday_color if is_gone else 'white'
             is_last_one = age == final_year
             current_cell_size = last_cell_size if is_last_one else cell_size
             current_border_width = border_width_last_cell if is_last_one else border_width_special_weeks
             circle (dwg, x_pos, y_pos, current_cell_size, birthday_color, fill, current_border_width)
         elif is_new_year: 
+            fill = new_year_color if is_gone else 'white'
             circle (dwg, x_pos, y_pos, cell_size, new_year_color, fill, border_width_special_weeks)
-        else: 
+        else: # normal week
+            fill = week_color if is_gone else 'white'
             circle (dwg, x_pos, y_pos, cell_size, week_color, fill, border_width)
 
         
@@ -180,8 +188,8 @@ for y in range(n_y):
         y_pos += distance_cells_y
 
 #Draw title 
-text(dwg, canvas_x/2, margin_top - title_offset, title, text_color, title_size)
-text(dwg, canvas_x/2, margin_top - subtitle_offset, subtitle, text_color, subtitle_size)
+text(dwg, canvas_x/2, margin_top - title_offset, title, title_color, title_size)
+text(dwg, canvas_x/2, margin_top - subtitle_offset, subtitle, subtitle_color, subtitle_size)
 
 export(dwg, svg_name, out_name)
 
