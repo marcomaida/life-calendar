@@ -55,7 +55,7 @@ svg_name = 'output/out.svg'
 out_name = 'output/out.pdf'
 
 title_color = '#151515'
-subtitle_color = '#909090'
+subtitle_color = '#A0A0A0'
 line_header_color = '#151515'
 week_color = '#4A4A4A'
 birthday_color = '#FF4A91'
@@ -66,10 +66,11 @@ canvas_x = 2100
 canvas_y = 2970
 
 final_year = 50
+name = "Marco"
 title = f"MY LIFE BEFORE {final_year}"
 title_size = 170
 title_offset = 130
-subtitle = f"Each dot is a week. Spend them wisely."
+subtitle = f"Each dot is a week. Live meaningful days, {name}."
 subtitle_size = 30
 subtitle_offset = 80
 cell_size = 13
