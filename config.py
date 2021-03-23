@@ -19,8 +19,8 @@ birthday = datetime.date(1994, 8, 13)
 ##########################################
 
 # File
-svg_name = 'output/out.svg'
-out_name = 'output/out.pdf'
+svg_name = 'output/life calendar.svg'
+out_name = 'output/life calendar.pdf'
 
 # Dates
 today = datetime.date.today()
