@@ -1,7 +1,7 @@
 import svgwrite, datetime, math
-from datetime import date
 from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPDF
+from config import *
 
 ##########################################
 # Helpers
@@ -42,56 +42,6 @@ def export (dwg, svg_name, pdf_name):
     drawing = svg2rlg(svg_name)
     renderPDF.drawToFile(drawing, pdf_name)
 
-##########################################
-# Parameters
-##########################################
-
-today = datetime.date.today()
-birthday = datetime.date(1994, 8, 13) # MM
-# birthday = datetime.date(1997, 11, 24) # MP
-# birthday = datetime.date(2000, 1, 1) # First
-
-svg_name = 'output/out.svg'
-out_name = 'output/out.pdf'
-
-title_color = '#151515'
-subtitle_color = '#A0A0A0'
-line_header_color = '#151515'
-week_color = '#4A4A4A'
-birthday_color = '#FF4A91'
-new_year_color = '#00D8BE'
-border_width = 1
-border_width_special_weeks = 2
-canvas_x = 2100
-canvas_y = 2970
-
-final_year = 50
-name = "Marco"
-title = f"MY LIFE BEFORE {final_year}"
-title_size = 170
-title_offset = 130
-subtitle = f"Each dot is a week. Live meaningful days, {name}."
-subtitle_size = 30
-subtitle_offset = 80
-cell_size = 13
-last_cell_size = 25
-border_width_last_cell = 4
-n_x = 52
-line_header_size = 17
-line_header_distance = 30
-margin_left = 250
-margin_right = 170
-margin_top = 400
-margin_bottom = 260
-
-# Cells are grouped horizontally and vertically
-group_size_x = 4
-group_size_y = 10
-
-# How close are cells of the same group
-group_density_x = .35
-group_density_y = .15
-
 assert 0 <= group_density_x and group_density_x <= 1, "Group density should be in the range [0,1]"
 assert 0 <= group_density_y and group_density_y <= 1, "Group density should be in the range [0,1]"
 
@@ -103,23 +53,23 @@ n_y = math.ceil(total_weeks / n_x)
 total_space_x = canvas_x - margin_left - margin_right
 total_space_y = canvas_y - margin_top - margin_bottom
 
-n_spaces_x = n_x - 1
-n_spaces_y = n_y - 1
+n_gaps_x = n_x - 1
+n_gaps_y = n_y - 1
 
-n_group_spaces_x = math.ceil(n_x / group_size_x) - 1
-n_group_spaces_y = math.ceil(n_y / group_size_y) - 1
+n_group_gaps_x = math.ceil(n_x / group_size_x) - 1
+n_group_gaps_y = math.ceil(n_y / group_size_y) - 1
 
-n_cell_spaces_x = n_spaces_x - n_group_spaces_x
-n_cell_spaces_y = n_spaces_y - n_group_spaces_y
+n_cell_gaps_x = n_gaps_x - n_group_gaps_x
+n_cell_gaps_y = n_gaps_y - n_group_gaps_y
 
-assert n_group_spaces_x + n_cell_spaces_x == n_spaces_x
-assert n_group_spaces_y + n_cell_spaces_y == n_spaces_y
+assert n_group_gaps_x + n_cell_gaps_x == n_gaps_x
+assert n_group_gaps_y + n_cell_gaps_y == n_gaps_y
 
-distance_cells_x = total_space_x / n_spaces_x * (1-group_density_x)
-distance_cells_y = total_space_y / n_spaces_y * (1-group_density_y)
+distance_cells_x = total_space_x / n_gaps_x * (1-group_density_x)
+distance_cells_y = total_space_y / n_gaps_y * (1-group_density_y)
 
-distance_groups_x = (total_space_x - (distance_cells_x * n_cell_spaces_x)) / n_group_spaces_x
-distance_groups_y = (total_space_y - (distance_cells_y * n_cell_spaces_y)) / n_group_spaces_y
+distance_groups_x = (total_space_x - (distance_cells_x * n_cell_gaps_x)) / n_group_gaps_x
+distance_groups_y = (total_space_y - (distance_cells_y * n_cell_gaps_y)) / n_group_gaps_y
 
 ##########################################
 # Drawing
@@ -145,7 +95,9 @@ for y in range(n_y):
         year_header = str(this_year)
     else:
         year_header = f"{this_year} • {last_cell_year}"
-    text(dwg, start_x - line_header_distance, y_pos + cell_size/2, year_header, line_header_color, line_header_size, 'normal','end')
+
+    text_height = line_header_size * .75 # Rough estimation of the actual size. Cannot move the anchor on the bottom, because the PDF converter ignores the dominant baseline
+    text(dwg, start_x - line_header_distance, y_pos + text_height/2, year_header, line_header_color, line_header_size, 'normal','end')
 
     x_pos = start_x
 
@@ -166,7 +118,7 @@ for y in range(n_y):
             fill = birthday_color if is_gone else 'white'
             is_last_one = age == final_year
             current_cell_size = last_cell_size if is_last_one else cell_size
-            current_border_width = border_width_last_cell if is_last_one else border_width_special_weeks
+            current_border_width = last_cell_border_width if is_last_one else border_width_special_weeks
             circle (dwg, x_pos, y_pos, current_cell_size, birthday_color, fill, current_border_width)
         elif is_new_year: 
             fill = new_year_color if is_gone else 'white'
@@ -175,9 +127,7 @@ for y in range(n_y):
             fill = week_color if is_gone else 'white'
             circle (dwg, x_pos, y_pos, cell_size, week_color, fill, border_width)
 
-        
         if age == final_year: break
-
 
         if (x+1) % group_size_x == 0:
             x_pos += distance_groups_x
@@ -186,32 +136,11 @@ for y in range(n_y):
 
         date += one_week
     
-    if (y+1) % group_size_y == 0:
-        y_pos += distance_groups_y
-    else:
-        y_pos += distance_cells_y
+    space_group_y = (y+1) % group_size_y == 0
+    y_pos += distance_groups_y if space_group_y else distance_cells_y
 
 #Draw title 
 text(dwg, canvas_x/2, margin_top - title_offset, title, title_color, title_size)
 text(dwg, canvas_x/2, margin_top - subtitle_offset, subtitle, subtitle_color, subtitle_size, 'italic')
 
 export(dwg, svg_name, out_name)
-
-"""
-dwg.add(dwg.line((20, 20), (2000, 2000), stroke=svgwrite.rgb(10, 10, 16, '%')))
-dwg.add(dwg.line((10, 10), (2000, 2000), stroke=svgwrite.rgb(10, 10, 16, '%')))
-"""
-
-"""
-size = size / math.sqrt(2) # we are making a diamond
-box = dwg.rect((x-size/2,y-size/2),(size,size),
-    stroke=birthday_color,
-    fill=fill)
-box.rotate(45, center=(x,y))
-dwg.add(box)
-"""
-'''
-dwg.add(dwg.rect((x-size/2,y-size/2),(size,size),
-    stroke=new_year_color,
-    fill=fill))
-'''
