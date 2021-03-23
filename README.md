@@ -1,5 +1,7 @@
 # Life Calendar Generator
 
+Generate a personalized life calendar in five minutes.
+
 ## Requirements
 
 ```
