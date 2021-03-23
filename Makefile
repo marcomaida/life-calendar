@@ -1,0 +1,2 @@
+all:
+	./life-calendar.py
