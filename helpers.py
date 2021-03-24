@@ -18,7 +18,7 @@ def circle(dwg, x, y, size, stroke_color, fill_color, border_width):
 
 def text (dwg, x, y, text, color, font_size, style='normal',text_anchor='middle'):
     text_style = f"""
-        font-family: helvetica; 
+        font-family: {font_family}; 
         font-style: {style}; 
         """ # Font style is not working in the PDF 
 

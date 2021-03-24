@@ -29,6 +29,7 @@ today = datetime.date.today()
 title_size = 170
 title_offset = 130
 title_color = '#151515'
+font_family = 'helvetica' # Also used for other texts
 
 # Subtitle
 subtitle_size = 30
