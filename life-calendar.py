@@ -1,4 +1,5 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python3
+ 
 ##########################################
 # LIFE CALENDAR GENERATOR
 # Customize the calendar by changing the config file
